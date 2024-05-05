@@ -11,9 +11,9 @@ import json
 
 
 class Bot:
-    def __init__(self, api_key, root_url="https://api.manifold.markets"):
-        self.api_key = api_key
-        self.root_url = root_url
+    def __init__(self, api_key):
+        self._api_key = api_key
+        self.root_url = "https://api.manifold.markets"
 
     @staticmethod
     def __response_code(res):
@@ -56,7 +56,7 @@ class Bot:
 
     def get_me(self, **kwargs):
         url = f"{self.root_url}/v0/me"
-        response = requests.get(url, headers={"Authorization": f"Key {self.api_key}"})
+        response = requests.get(url, headers={"Authorization": f"Key {self._api_key}"})
         return self.__response_code(response)
 
     def get_groups(self, **kwargs):
@@ -129,7 +129,9 @@ class Bot:
         limit = kwargs.pop("limit", 100)
         offset = kwargs.pop("offset", None)
 
-        response = requests.get(url, params={"term": term, "sort": sort, "filter": fltr, "contractType": contract_type, "topicSlug": topic_slug, "creatorId": creator_id, "limit": limit, "offset": offset})
+        response = requests.get(url, params={"term": term, "sort": sort, "filter": fltr, "contractType": contract_type,
+                                             "topicSlug": topic_slug, "creatorId": creator_id, "limit": limit,
+                                             "offset": offset})
         return self.__response_code(response)
 
     def get_users(self, **kwargs):
@@ -150,7 +152,8 @@ class Bot:
         page = kwargs.pop("page", None)
         user_id = kwargs.pop("user_id", None)
 
-        response = requests.get(url, params={"contractId": contract_id, "contractSlug": contract_slug, "limit": limit, "page": page, "userId": user_id})
+        response = requests.get(url, params={"contractId": contract_id, "contractSlug": contract_slug, "limit": limit,
+                                             "page": page, "userId": user_id})
         return self.__response_code(response)
 
     def get_bets(self, **kwargs):
@@ -166,7 +169,9 @@ class Bot:
         kinds = kwargs.pop("kinds", None)
         order = kwargs.pop("order", "desc")
 
-        response = requests.get(url, params={"userId": user_id, "username": user_name, "contractId": contract_id, "contractSlug": contract_slug, "limit": limit, "before": before, "after": after, "kinds": kinds, "order": order})
+        response = requests.get(url, params={"userId": user_id, "username": user_name, "contractId": contract_id,
+                                             "contractSlug": contract_slug, "limit": limit, "before": before,
+                                             "after": after, "kinds": kinds, "order": order})
         return self.__response_code(response)
 
     def get_managrams(self, **kwargs):
@@ -178,7 +183,8 @@ class Bot:
         before = kwargs.pop("before", None)
         after = kwargs.pop("after", None)
 
-        response = requests.get(url, params={"toId": to_id, "fromId": from_id, "limit": limit, "before": before, "after": after})
+        response = requests.get(url, params={"toId": to_id, "fromId": from_id, "limit": limit, "before": before,
+                                             "after": after})
         return self.__response_code(response)
 
     @staticmethod
@@ -212,65 +218,64 @@ class Bot:
     get_managrams = __print(get_managrams)
 
 
-load_dotenv()
+def __main__():
+    load_dotenv()
+
+    def print_all(lst):
+        if isinstance(lst, list):
+            for item in lst:
+                print(item)
+                pass
+        else:
+            print(lst)
+
+    # pt = print to console
+
+    bot = Bot(getenv("API_KEY"))
+    bot.ping(pt=True)
+
+    # bot.get_user_info("And", pt=True)
+    # bot.get_user_info("And", lite=True, pt=True)
+
+    # bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", pt=True)
+    # bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", lite=True, pt=True)
+
+    # bot.get_me(pt=True)
+
+    # groups = bot.get_groups(before='2023.01.04 22:11:05.123000', available_to_id="hKURbhPsW2VpezOdAAisTTCIBLn2")
+    # print_all(groups)
+
+    # bot.get_grpoup_by_slug("astroworld", pt=True)
+
+    # bot.get_group_by_id("72sPPf5PTwnQQWGdZ5cR", pt=True)
+
+    # before shows all lower than choosen
+    # markets = bot.get_markets(limit=10, sort='created-time', order='desc', before='YjSqIbphVnHDJxcplwRt', user_id="n3zzATIKccTzFxyifz7vSGNKjHD3")
+    # print_all(markets)
+
+    # bot.get_market_by_id("YjSqIbphVnHDJxcplwRt", pt=True)
+
+    market = json.dumps(ast.literal_eval(str(bot.get_market_by_slug("will-gpt-be-said-by-anyone-in-a-pre"))))
+    marketid = json.loads(market)['id']
+
+    # positions = bot.get_market_positions(marketid, order='profit', top=10, bottom=10, pt=True)
+    # print_all(positions)
+
+    # markets_searched = bot.get_markets_by_filter(term="GPT", sort="newest", filter="closing-this-month", contract_type="BINARY", limit=10, offset=2)
+    # print_all(markets_searched)
+
+    # users = bot.get_users(limit=30, before='hKURbhPsW2VpezOdAAisTTCIBLn2')
+    # print_all(users)
+
+    # comments = bot.get_comments(contract_id=marketid, limit=10)
+    # print_all(comments)
+
+    bets = bot.get_bets(contract_id=marketid, limit=10)
+    print_all(bets)
+
+    # managrams = bot.get_managrams(to_id="IPTOzEqrpkWmEzh6hwvAyY9PqFb2")
+    # print_all(managrams)
 
 
-def print_all(lst):
-    if isinstance(lst, list):
-        for item in lst:
-            print(item)
-            pass
-    else:
-        print(lst)
-
-
-# pt = print to console
-
-bot = Bot(getenv("API_KEY"))
-# bot.ping(pt=True)
-
-bot.get_user_info("And", pt=True)
-# bot.get_user_info("And", lite=True, pt=True)
-
-# bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", pt=True)
-# bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", lite=True, pt=True)
-
-# bot.get_me(pt=True)
-
-# groups = bot.get_groups(before='2023.01.04 22:11:05.123000', available_to_id="hKURbhPsW2VpezOdAAisTTCIBLn2")
-# print_all(groups)
-
-# bot.get_grpoup_by_slug("astroworld", pt=True)
-
-# bot.get_group_by_id("72sPPf5PTwnQQWGdZ5cR", pt=True)
-
-# before shows all lower than choosen
-# markets = bot.get_markets(limit=10, sort='created-time', order='desc', before='YjSqIbphVnHDJxcplwRt', user_id="n3zzATIKccTzFxyifz7vSGNKjHD3")
-# print_all(markets)
-
-# bot.get_market_by_id("YjSqIbphVnHDJxcplwRt", pt=True)
-
-
-# market = json.dumps(ast.literal_eval(str(bot.get_market_by_slug("will-gpt-be-said-by-anyone-in-a-pre"))))
-# marketid = json.loads(market)['id']
-
-# positions = bot.get_market_positions(marketid, order='profit', top=10, bottom=10, pt=True)
-# print_all(positions)
-
-
-# markets_searched = bot.get_markets_by_filter(term="GPT", sort="newest", filter="closing-this-month", contract_type="BINARY", limit=10, offset=2)
-# print_all(markets_searched)
-
-# users = bot.get_users(limit=30, before='hKURbhPsW2VpezOdAAisTTCIBLn2')
-# print_all(users)
-
-# comments = bot.get_comments(contract_id=marketid, limit=10)
-# print_all(comments)
-
-# bets = bot.get_bets(contract_id=marketid, limit=10)
-# print_all(bets)
-
-#managrams = bot.get_managrams(to_id="IPTOzEqrpkWmEzh6hwvAyY9PqFb2")
-#print_all(managrams)
-
-
+if __name__ == "__main__":
+    __main__()
