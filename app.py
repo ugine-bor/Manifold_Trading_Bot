@@ -33,18 +33,26 @@ class Bot:
         return self.__response_code(response)
 
     def get_user_info(self, name, **kwargs):
-        url = f"{self.root_url}/v0/user/{name}"
-        response = requests.get(url, headers={"Authorization": f"Bearer {self.api_key}"})
-        return self.__response_code(response)
-
-    def get_user_info_lite(self, name, **kwargs):
-        url = f"{self.root_url}/v0/user/{name}/lite"
-        response = requests.get(url, headers={"Authorization": f"Bearer {self.api_key}"})
+        is_lite = kwargs.get("lite", False)
+        if is_lite:
+            url = f"{self.root_url}/v0/user/{name}/lite"
+        else:
+            url = f"{self.root_url}/v0/user/{name}"
+        response = requests.get(url)
         return self.__response_code(response)
 
     def get_user_by_id(self, id, **kwargs):
-        url = f"{self.root_url}/v0/user/by-id/{id}"
-        response = requests.get(url, headers={"Authorization": f"Bearer {self.api_key}"})
+        is_lite = kwargs.get("lite", False)
+        if is_lite:
+            url = f"{self.root_url}/v0/user/by-id/{id}/lite"
+        else:
+            url = f"{self.root_url}/v0/user/by-id/{id}"
+        response = requests.get(url)
+        return self.__response_code(response)
+
+    def get_me(self, **kwargs):
+        url = f"{self.root_url}/v0/me"
+        response = requests.get(url, headers={"Authorization": f"Key {self.api_key}"})
         return self.__response_code(response)
 
     @staticmethod
@@ -54,20 +62,28 @@ class Bot:
 
             to_print = kwargs.pop("pt", False)
             if to_print:
-                print(f"\nMethod: {method.__name__}\nResult: {result}\n")
+                print(f"\nMethod: {method.__name__} {'(lite)' if kwargs.pop('lite', False) else ''}\nResult: {result}\n")
             return result
 
         return wrapper
 
     ping = __print(ping)
     get_user_info = __print(get_user_info)
-    get_user_info_lite = __print(get_user_info_lite)
     get_user_by_id = __print(get_user_by_id)
+    get_me = __print(get_me)
 
 
 load_dotenv()
 
+# pt = print to console
+
 bot = Bot(getenv("API_KEY"))
 bot.ping(pt=True)
-bot.get_user_info("And")
-bot.get_user_info_lite("And", pt=True)
+
+bot.get_user_info("And", pt=True)
+bot.get_user_info("And", lite=True, pt=True)
+
+bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", pt=True)
+bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", lite=True, pt=True)
+
+bot.get_me(pt=True)
