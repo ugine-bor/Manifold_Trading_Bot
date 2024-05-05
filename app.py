@@ -141,6 +141,46 @@ class Bot:
         response = requests.get(url, params={"limit": limit, "before": before})
         return self.__response_code(response)
 
+    def get_comments(self, **kwargs):
+        url = f"{self.root_url}/v0/comments"
+
+        contract_id = kwargs.pop("contract_id", None)
+        contract_slug = kwargs.pop("contract_slug", None)
+        limit = kwargs.pop("limit", 5000)
+        page = kwargs.pop("page", None)
+        user_id = kwargs.pop("user_id", None)
+
+        response = requests.get(url, params={"contractId": contract_id, "contractSlug": contract_slug, "limit": limit, "page": page, "userId": user_id})
+        return self.__response_code(response)
+
+    def get_bets(self, **kwargs):
+        url = f"{self.root_url}/v0/bets"
+
+        user_id = kwargs.pop("user_id", None)
+        user_name = kwargs.pop("user_name", None)
+        contract_id = kwargs.pop("contract_id", None)
+        contract_slug = kwargs.pop("contract_slug", None)
+        limit = kwargs.pop("limit", 1000)
+        before = kwargs.pop("before", None)
+        after = kwargs.pop("after", None)
+        kinds = kwargs.pop("kinds", None)
+        order = kwargs.pop("order", "desc")
+
+        response = requests.get(url, params={"userId": user_id, "username": user_name, "contractId": contract_id, "contractSlug": contract_slug, "limit": limit, "before": before, "after": after, "kinds": kinds, "order": order})
+        return self.__response_code(response)
+
+    def get_managrams(self, **kwargs):
+        url = f"{self.root_url}/v0/managrams"
+
+        to_id = kwargs.pop("to_id", None)
+        from_id = kwargs.pop("from_id", None)
+        limit = kwargs.pop("limit", 100)
+        before = kwargs.pop("before", None)
+        after = kwargs.pop("after", None)
+
+        response = requests.get(url, params={"toId": to_id, "fromId": from_id, "limit": limit, "before": before, "after": after})
+        return self.__response_code(response)
+
     @staticmethod
     def __print(method):
         def wrapper(*args, **kwargs):
@@ -167,6 +207,9 @@ class Bot:
     get_market_positions = __print(get_market_positions)
     get_markets_by_filter = __print(get_markets_by_filter)
     get_users = __print(get_users)
+    get_comments = __print(get_comments)
+    get_bets = __print(get_bets)
+    get_managrams = __print(get_managrams)
 
 
 load_dotenv()
@@ -208,15 +251,26 @@ bot.get_user_info("And", pt=True)
 # bot.get_market_by_id("YjSqIbphVnHDJxcplwRt", pt=True)
 
 
-#market = json.dumps(ast.literal_eval(str(bot.get_market_by_slug("will-gpt-be-said-by-anyone-in-a-pre"))))
-#marketid = json.loads(market)['id']
+# market = json.dumps(ast.literal_eval(str(bot.get_market_by_slug("will-gpt-be-said-by-anyone-in-a-pre"))))
+# marketid = json.loads(market)['id']
 
-#positions = bot.get_market_positions(marketid, order='profit', top=10, bottom=10, pt=True)
-#print_all(positions)
+# positions = bot.get_market_positions(marketid, order='profit', top=10, bottom=10, pt=True)
+# print_all(positions)
 
 
-#markets_searched = bot.get_markets_by_filter(term="GPT", sort="newest", filter="closing-this-month", contract_type="BINARY", limit=10, offset=2)
-#print_all(markets_searched)
+# markets_searched = bot.get_markets_by_filter(term="GPT", sort="newest", filter="closing-this-month", contract_type="BINARY", limit=10, offset=2)
+# print_all(markets_searched)
 
 # users = bot.get_users(limit=30, before='hKURbhPsW2VpezOdAAisTTCIBLn2')
 # print_all(users)
+
+# comments = bot.get_comments(contract_id=marketid, limit=10)
+# print_all(comments)
+
+# bets = bot.get_bets(contract_id=marketid, limit=10)
+# print_all(bets)
+
+#managrams = bot.get_managrams(to_id="IPTOzEqrpkWmEzh6hwvAyY9PqFb2")
+#print_all(managrams)
+
+
