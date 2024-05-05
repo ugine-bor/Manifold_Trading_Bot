@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from os import getenv
 
 from datetime import datetime
+import ast
+import json
 
 
 class Bot:
@@ -80,6 +82,65 @@ class Bot:
         response = requests.get(url)
         return self.__response_code(response)
 
+    def get_markets(self, **kwargs):
+        url = f"{self.root_url}/v0/markets"
+
+        limit = kwargs.pop("limit", 500)
+        sort = kwargs.pop("sort", "created-time")
+        order = kwargs.pop("order", "desc")
+        before = kwargs.pop("before", None)
+        user_id = kwargs.pop("user_id", None)
+        group_id = kwargs.pop("group_id", None)
+
+        response = requests.get(url, params={"limit": limit, "sort": sort, "order": order, "before": before,
+                                             "userId": user_id, "groupId": group_id})
+        return self.__response_code(response)
+
+    def get_market_by_id(self, id, **kwargs):
+        url = f"{self.root_url}/v0/market/{id}"
+        response = requests.get(url)
+        return self.__response_code(response)
+
+    def get_market_by_slug(self, slug, **kwargs):
+        url = f"{self.root_url}/v0/slug/{slug}"
+        response = requests.get(url)
+        return self.__response_code(response)
+
+    def get_market_positions(self, id, **kwargs):
+        url = f"{self.root_url}/v0/market/{id}/positions"
+
+        order = kwargs.pop("order", "profit")
+        top = kwargs.pop("top", None)
+        bottom = kwargs.pop("bottom", None)
+        user_id = kwargs.pop("user_id", None)
+
+        response = requests.get(url, params={"order": order, "top": top, "bottom": bottom, "userId": user_id})
+        return self.__response_code(response)
+
+    def get_markets_by_filter(self, **kwargs):
+        url = f"{self.root_url}/v0/search-markets"
+
+        term = kwargs.pop("term", None)
+        sort = kwargs.pop("sort", "score")
+        fltr = kwargs.pop("filter", "all")
+        contract_type = kwargs.pop("contract_type", "ALL")
+        topic_slug = kwargs.pop("topic_slug", None)
+        creator_id = kwargs.pop("creator_id", None)
+        limit = kwargs.pop("limit", 100)
+        offset = kwargs.pop("offset", None)
+
+        response = requests.get(url, params={"term": term, "sort": sort, "filter": fltr, "contractType": contract_type, "topicSlug": topic_slug, "creatorId": creator_id, "limit": limit, "offset": offset})
+        return self.__response_code(response)
+
+    def get_users(self, **kwargs):
+        url = f"{self.root_url}/v0/users"
+
+        limit = kwargs.pop("limit", 500)
+        before = kwargs.pop("before", None)
+
+        response = requests.get(url, params={"limit": limit, "before": before})
+        return self.__response_code(response)
+
     @staticmethod
     def __print(method):
         def wrapper(*args, **kwargs):
@@ -98,7 +159,14 @@ class Bot:
     get_user_by_id = __print(get_user_by_id)
     get_me = __print(get_me)
     get_groups = __print(get_groups)
-    get_grpoup_by_slug = __print(get_group_by_slug)
+    get_group_by_slug = __print(get_group_by_slug)
+    get_group_by_id = __print(get_group_by_id)
+    get_markets = __print(get_markets)
+    get_market_by_id = __print(get_market_by_id)
+    get_market_by_slug = __print(get_market_by_slug)
+    get_market_positions = __print(get_market_positions)
+    get_markets_by_filter = __print(get_markets_by_filter)
+    get_users = __print(get_users)
 
 
 load_dotenv()
@@ -116,17 +184,39 @@ def print_all(lst):
 # pt = print to console
 
 bot = Bot(getenv("API_KEY"))
-bot.ping(pt=True)
+# bot.ping(pt=True)
 
 bot.get_user_info("And", pt=True)
-bot.get_user_info("And", lite=True, pt=True)
+# bot.get_user_info("And", lite=True, pt=True)
 
-bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", pt=True)
-bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", lite=True, pt=True)
+# bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", pt=True)
+# bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", lite=True, pt=True)
 
-bot.get_me(pt=True)
+# bot.get_me(pt=True)
 
-groups = bot.get_groups(before='2023.01.04 22:11:05.123000', available_to_id="hKURbhPsW2VpezOdAAisTTCIBLn2")
-print_all(groups)
+# groups = bot.get_groups(before='2023.01.04 22:11:05.123000', available_to_id="hKURbhPsW2VpezOdAAisTTCIBLn2")
+# print_all(groups)
 
-bot.get_grpoup_by_slug("astroworld", pt=True)
+# bot.get_grpoup_by_slug("astroworld", pt=True)
+
+# bot.get_group_by_id("72sPPf5PTwnQQWGdZ5cR", pt=True)
+
+# before shows all lower than choosen
+# markets = bot.get_markets(limit=10, sort='created-time', order='desc', before='YjSqIbphVnHDJxcplwRt', user_id="n3zzATIKccTzFxyifz7vSGNKjHD3")
+# print_all(markets)
+
+# bot.get_market_by_id("YjSqIbphVnHDJxcplwRt", pt=True)
+
+
+#market = json.dumps(ast.literal_eval(str(bot.get_market_by_slug("will-gpt-be-said-by-anyone-in-a-pre"))))
+#marketid = json.loads(market)['id']
+
+#positions = bot.get_market_positions(marketid, order='profit', top=10, bottom=10, pt=True)
+#print_all(positions)
+
+
+#markets_searched = bot.get_markets_by_filter(term="GPT", sort="newest", filter="closing-this-month", contract_type="BINARY", limit=10, offset=2)
+#print_all(markets_searched)
+
+# users = bot.get_users(limit=30, before='hKURbhPsW2VpezOdAAisTTCIBLn2')
+# print_all(users)
