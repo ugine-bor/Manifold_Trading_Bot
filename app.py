@@ -67,7 +67,7 @@ class Bot:
             before_time = before_time.ljust(23, '0') if ' ' in before_time else before_time + '.000'
             before_time = str(datetime.strptime(before_time, "%Y.%m.%d %H:%M:%S.%f").timestamp()).replace('.', '')
 
-        available_to = kwargs.pop("available_to_id", None)
+        available_to = kwargs.pop("availableToUserId", None)
         response = requests.get(url, params={"beforeTime": before_time, "availableToUserId": available_to})
 
         return self.__response_code(response)
@@ -89,11 +89,11 @@ class Bot:
         sort = kwargs.pop("sort", "created-time")
         order = kwargs.pop("order", "desc")
         before = kwargs.pop("before", None)
-        user_id = kwargs.pop("user_id", None)
-        group_id = kwargs.pop("group_id", None)
+        userId = kwargs.pop("userId", None)
+        groupId = kwargs.pop("groupId", None)
 
         response = requests.get(url, params={"limit": limit, "sort": sort, "order": order, "before": before,
-                                             "userId": user_id, "groupId": group_id})
+                                             "userId": userId, "groupId": groupId})
         return self.__response_code(response)
 
     def get_market_by_id(self, id, **kwargs):
@@ -112,9 +112,9 @@ class Bot:
         order = kwargs.pop("order", "profit")
         top = kwargs.pop("top", None)
         bottom = kwargs.pop("bottom", None)
-        user_id = kwargs.pop("user_id", None)
+        userId = kwargs.pop("userId", None)
 
-        response = requests.get(url, params={"order": order, "top": top, "bottom": bottom, "userId": user_id})
+        response = requests.get(url, params={"order": order, "top": top, "bottom": bottom, "userId": userId})
         return self.__response_code(response)
 
     def get_markets_by_filter(self, **kwargs):
@@ -125,12 +125,12 @@ class Bot:
         fltr = kwargs.pop("filter", "all")
         contract_type = kwargs.pop("contract_type", "ALL")
         topic_slug = kwargs.pop("topic_slug", None)
-        creator_id = kwargs.pop("creator_id", None)
+        creatorId = kwargs.pop("creatorId", None)
         limit = kwargs.pop("limit", 100)
         offset = kwargs.pop("offset", None)
 
         response = requests.get(url, params={"term": term, "sort": sort, "filter": fltr, "contractType": contract_type,
-                                             "topicSlug": topic_slug, "creatorId": creator_id, "limit": limit,
+                                             "topicSlug": topic_slug, "creatorId": creatorId, "limit": limit,
                                              "offset": offset})
         return self.__response_code(response)
 
@@ -146,45 +146,55 @@ class Bot:
     def get_comments(self, **kwargs):
         url = f"{self.root_url}/v0/comments"
 
-        contract_id = kwargs.pop("contract_id", None)
-        contract_slug = kwargs.pop("contract_slug", None)
+        contractId = kwargs.pop("contractId", None)
+        contractSlug = kwargs.pop("contractSlug", None)
         limit = kwargs.pop("limit", 5000)
         page = kwargs.pop("page", None)
-        user_id = kwargs.pop("user_id", None)
+        userId = kwargs.pop("userId", None)
 
-        response = requests.get(url, params={"contractId": contract_id, "contractSlug": contract_slug, "limit": limit,
-                                             "page": page, "userId": user_id})
+        response = requests.get(url, params={"contractId": contractId, "contractSlug": contractSlug, "limit": limit,
+                                             "page": page, "userId": userId})
         return self.__response_code(response)
 
     def get_bets(self, **kwargs):
         url = f"{self.root_url}/v0/bets"
 
-        user_id = kwargs.pop("user_id", None)
-        user_name = kwargs.pop("user_name", None)
-        contract_id = kwargs.pop("contract_id", None)
-        contract_slug = kwargs.pop("contract_slug", None)
+        userId = kwargs.pop("userId", None)
+        username = kwargs.pop("username", None)
+        contractId = kwargs.pop("contractId", None)
+        contractSlug = kwargs.pop("contractSlug", None)
         limit = kwargs.pop("limit", 1000)
         before = kwargs.pop("before", None)
         after = kwargs.pop("after", None)
         kinds = kwargs.pop("kinds", None)
         order = kwargs.pop("order", "desc")
 
-        response = requests.get(url, params={"userId": user_id, "username": user_name, "contractId": contract_id,
-                                             "contractSlug": contract_slug, "limit": limit, "before": before,
+        response = requests.get(url, params={"userId": userId, "username": username, "contractId": contractId,
+                                             "contractSlug": contractSlug, "limit": limit, "before": before,
                                              "after": after, "kinds": kinds, "order": order})
         return self.__response_code(response)
 
     def get_managrams(self, **kwargs):
         url = f"{self.root_url}/v0/managrams"
 
-        to_id = kwargs.pop("to_id", None)
-        from_id = kwargs.pop("from_id", None)
+        toId = kwargs.pop("toId", None)
+        fromId = kwargs.pop("fromId", None)
         limit = kwargs.pop("limit", 100)
         before = kwargs.pop("before", None)
         after = kwargs.pop("after", None)
 
-        response = requests.get(url, params={"toId": to_id, "fromId": from_id, "limit": limit, "before": before,
+        response = requests.get(url, params={"toId": toId, "fromId": fromId, "limit": limit, "before": before,
                                              "after": after})
+        return self.__response_code(response)
+
+    def get_leagues(self, **kwargs):
+        url = f"{self.root_url}/v0/leagues"
+
+        userId = kwargs.pop("userId", None)
+        season = kwargs.pop("season", None)
+        cohort = kwargs.pop("cohort", None)
+
+        response = requests.get(url, params={"userId": userId, "season": season, "cohort": cohort})
         return self.__response_code(response)
 
     @staticmethod
@@ -216,6 +226,20 @@ class Bot:
     get_comments = __print(get_comments)
     get_bets = __print(get_bets)
     get_managrams = __print(get_managrams)
+    get_leagues = __print(get_leagues)
+
+    def post_bet(self, **kwargs):
+        url = f"{self.root_url}/v0/bet"
+
+        data = {}
+        for i in kwargs:
+            if i != "pt" and kwargs[i]:
+                data[i] = kwargs[i]
+
+        response = requests.post(url, json=data, headers={"Authorization": f"Key {self._api_key}"})
+        return self.__response_code(response)
+
+    post_bet = __print(post_bet)
 
 
 def __main__():
@@ -242,7 +266,7 @@ def __main__():
 
     # bot.get_me(pt=True)
 
-    # groups = bot.get_groups(before='2023.01.04 22:11:05.123000', available_to_id="hKURbhPsW2VpezOdAAisTTCIBLn2")
+    # groups = bot.get_groups(before='2023.01.04 22:11:05.123000', available_toId="hKURbhPsW2VpezOdAAisTTCIBLn2")
     # print_all(groups)
 
     # bot.get_grpoup_by_slug("astroworld", pt=True)
@@ -250,12 +274,12 @@ def __main__():
     # bot.get_group_by_id("72sPPf5PTwnQQWGdZ5cR", pt=True)
 
     # before shows all lower than choosen
-    # markets = bot.get_markets(limit=10, sort='created-time', order='desc', before='YjSqIbphVnHDJxcplwRt', user_id="n3zzATIKccTzFxyifz7vSGNKjHD3")
+    # markets = bot.get_markets(limit=10, sort='created-time', order='desc', before='YjSqIbphVnHDJxcplwRt', userId="n3zzATIKccTzFxyifz7vSGNKjHD3")
     # print_all(markets)
 
     # bot.get_market_by_id("YjSqIbphVnHDJxcplwRt", pt=True)
 
-    market = json.dumps(ast.literal_eval(str(bot.get_market_by_slug("will-gpt-be-said-by-anyone-in-a-pre"))))
+    market = json.dumps(ast.literal_eval(str(bot.get_market_by_slug("will-any-model-of-the-lmsys-chatbot"))))
     marketid = json.loads(market)['id']
 
     # positions = bot.get_market_positions(marketid, order='profit', top=10, bottom=10, pt=True)
@@ -267,14 +291,19 @@ def __main__():
     # users = bot.get_users(limit=30, before='hKURbhPsW2VpezOdAAisTTCIBLn2')
     # print_all(users)
 
-    # comments = bot.get_comments(contract_id=marketid, limit=10)
+    # comments = bot.get_comments(contractId=marketid, limit=10)
     # print_all(comments)
 
-    bets = bot.get_bets(contract_id=marketid, limit=10)
+    bot.post_bet(contractId=marketid, amount=10, outcome="NO", pt=True)
+
+    bets = bot.get_bets(contractId=marketid, limit=10)
     print_all(bets)
 
-    # managrams = bot.get_managrams(to_id="IPTOzEqrpkWmEzh6hwvAyY9PqFb2")
+    # managrams = bot.get_managrams(toId="IPTOzEqrpkWmEzh6hwvAyY9PqFb2")
     # print_all(managrams)
+
+    # leagues = bot.get_leagues(userId="hKURbhPsW2VpezOdAAisTTCIBLn2")
+    # print_all(leagues)
 
 
 if __name__ == "__main__":
