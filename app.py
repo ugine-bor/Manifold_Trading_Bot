@@ -4,6 +4,7 @@ import requests
 
 from dotenv import load_dotenv
 from os import getenv
+from time import sleep
 
 from datetime import datetime
 import ast
@@ -245,7 +246,7 @@ class Bot:
 def __main__():
     load_dotenv()
 
-    def print_all(lst):
+    def printall(lst):
         if isinstance(lst, list):
             for item in lst:
                 print(item)
@@ -257,53 +258,48 @@ def __main__():
 
     bot = Bot(getenv("API_KEY"))
     bot.ping(pt=True)
+    cache = {}
 
-    # bot.get_user_info("And", pt=True)
-    # bot.get_user_info("And", lite=True, pt=True)
+    while True:
+        markets = bot.get_markets_by_filter(
+            sort="newest",
+            filter="closing-this-month",
+            contract_type="BINARY",
+            limit=10
+        )
+        for market in markets:
+            marketid = market["id"]
+            slug = market["slug"]
+            marketvolume = float(market["volume"])
+            resolveprob = float(market["probability"])
 
-    # bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", pt=True)
-    # bot.get_user_by_id("hKURbhPsW2VpezOdAAisTTCIBLn2", lite=True, pt=True)
+            bets = bot.get_bets(contractId=marketid, limit=5)
 
-    # bot.get_me(pt=True)
+            if marketid in cache and cache[marketid] == bets:
+                sleep(1)
+                print("\nNo new bets\n")
+            else:
+                cache[marketid] = bets
+                print("\n\nFound new bets on market " + slug + "\n\n")
 
-    # groups = bot.get_groups(before='2023.01.04 22:11:05.123000', available_toId="hKURbhPsW2VpezOdAAisTTCIBLn2")
-    # print_all(groups)
+                if len(bets) > 2:
+                    print("Market volume: " + str(marketvolume))
+                    buff = []
+                    for bet in bets:
+                        buff.append((bet["amount"], bet["outcome"]))
+                    print("Buff: " + str(buff) + "\n")
 
-    # bot.get_grpoup_by_slug("astroworld", pt=True)
+                    if sum(map(lambda x: x[0], filter(lambda x: x[1] == "YES", buff))) >= marketvolume / 10:
+                        # Order NO limit bet:
+                        bot.post_bet(contractId=marketid, limitProb=resolveprob - 0.05, amount=1, outcome="NO",
+                                     pt=True)
+                        print(f"Ordered 1 on {slug} with limit of {resolveprob - 0.05}")
+                    elif sum(map(lambda x: x[0], filter(lambda x: x[1] == "NO", buff))) >= marketvolume / 10:
+                        # Order YES limit bet:
+                        bot.post_bet(contractId=marketid, limitProb=resolveprob + 0.05, amount=1, outcome="YES",
+                                     pt=True)
+                        print(f"Ordered 1 on {slug} with limit of {resolveprob + 0.05}")
 
-    # bot.get_group_by_id("72sPPf5PTwnQQWGdZ5cR", pt=True)
-
-    # before shows all lower than choosen
-    # markets = bot.get_markets(limit=10, sort='created-time', order='desc', before='YjSqIbphVnHDJxcplwRt', userId="n3zzATIKccTzFxyifz7vSGNKjHD3")
-    # print_all(markets)
-
-    # bot.get_market_by_id("YjSqIbphVnHDJxcplwRt", pt=True)
-
-    market = json.dumps(ast.literal_eval(str(bot.get_market_by_slug("will-any-model-of-the-lmsys-chatbot"))))
-    marketid = json.loads(market)['id']
-
-    # positions = bot.get_market_positions(marketid, order='profit', top=10, bottom=10, pt=True)
-    # print_all(positions)
-
-    # markets_searched = bot.get_markets_by_filter(term="GPT", sort="newest", filter="closing-this-month", contract_type="BINARY", limit=10, offset=2)
-    # print_all(markets_searched)
-
-    # users = bot.get_users(limit=30, before='hKURbhPsW2VpezOdAAisTTCIBLn2')
-    # print_all(users)
-
-    # comments = bot.get_comments(contractId=marketid, limit=10)
-    # print_all(comments)
-
-    bot.post_bet(contractId=marketid, amount=10, outcome="NO", pt=True)
-
-    bets = bot.get_bets(contractId=marketid, limit=10)
-    print_all(bets)
-
-    # managrams = bot.get_managrams(toId="IPTOzEqrpkWmEzh6hwvAyY9PqFb2")
-    # print_all(managrams)
-
-    # leagues = bot.get_leagues(userId="hKURbhPsW2VpezOdAAisTTCIBLn2")
-    # print_all(leagues)
 
 
 if __name__ == "__main__":
