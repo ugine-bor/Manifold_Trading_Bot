@@ -23,7 +23,7 @@ A Python-based trading bot that interacts with the [Manifold Markets](https://ma
 1. Clone repository:
    ```bash
    git clone https://github.com/ugine-bor/Manifold_Trading_Bot.git
-   cd manifold-bot
+   cd Manifold_Trading_Bot
    ```
 
 2. Install dependencies:
